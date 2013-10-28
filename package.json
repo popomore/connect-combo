@@ -1,9 +1,9 @@
 {
   "name": "connect-combo",
   "version": "0.1.0",
-  "description": "connect middleware for combo",
+  "description": "connect middleware for assets combo.",
   "dependencies": {
-    "async": "*"
+    "async": "~0.2.9"
   },
   "devDependencies": {
     "mocha": "~1.8.1",
