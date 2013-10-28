@@ -18,7 +18,7 @@ var app = connect()
   .listen(3000);
 ```
 
-See [example]() 
+See [example](https://github.com/popomore/connect-combo/blob/master/examples/index.js) 
 
 ## Option
 
