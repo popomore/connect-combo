@@ -16,48 +16,15 @@ var defaults = {
   proxy: false,
 
   // cache remote file
-  cache: false
+  cache: false,
+
+  // show log
+  log: false
 };
 
 module.exports = function combo(options) {
 
   options = extend(defaults, options);
-
-  return function(req, res, next) {
-    var files = normalize(req.url);
-    if (files && files.length) {
-      log('Request ' + req.url);
-      async.map(files, function(item, done) {
-        var filePath = path.join(options.directory, item);
-        fs.readFile(filePath, function(err, data) {
-          if (!err) {
-            // find file from directory
-            log('Found ' + filePath);
-            done(null, data.toString());
-          } else {
-            log('Not Found ' + filePath);
-            if (options.proxy) {
-              // find file from remote server
-              getRemote(url.resolve(options.proxy, item), done);
-            } else {
-              // not found
-              done(err);
-            }
-          }
-        });
-      }, function(err, results){
-        if (err) {
-          res.writeHead(404, {'Content-Type': 'text/html'});
-          res.end('404 Not Found');
-        } else {
-          res.end(results.join(''));
-        }
-      });
-    } else {
-      // next middleware
-      next();
-    }
-  };
 
   function getRemote(u, callback) {
     var parsed = url.parse(u);
@@ -97,6 +64,47 @@ module.exports = function combo(options) {
       callback(e);
     });
   }
+
+  function log(str) {
+    options.log && console.log('>> ' + str);
+  }
+
+  return function(req, res, next) {
+    var files = normalize(req.url);
+    if (files && files.length) {
+      log('Request ' + req.url);
+      async.map(files, function(item, done) {
+        var filePath = path.join(options.directory, item);
+        fs.readFile(filePath, function(err, data) {
+          if (!err) {
+            // find file from directory
+            log('Found ' + filePath);
+            done(null, data.toString());
+          } else {
+            log('Not Found ' + filePath);
+            if (options.proxy) {
+              // find file from remote server
+              getRemote(url.resolve(options.proxy, item), done);
+            } else {
+              // not found
+              done(err);
+            }
+          }
+        });
+      }, function(err, results){
+        if (err) {
+          res.writeHead(404, {'Content-Type': 'text/html'});
+          res.end('404 Not Found');
+        } else {
+          res.end(results.join(''));
+        }
+      });
+    } else {
+      // next middleware
+      next();
+    }
+  };
+
 };
 
 // '/a??b.js,c/d.js' => ['a/b.js', 'a/c/d.js']
@@ -120,10 +128,6 @@ function writeFileSync(filePath, data) {
     !fs.existsSync(p) && fs.mkdirSync(p);
   }
   fs.writeFileSync(filePath, data);
-}
-
-function log(str) {
-  console.log('>> ' + str);
 }
 
 function extend(target, src) {

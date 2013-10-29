@@ -9,6 +9,7 @@
     "mocha": "~1.8.1",
     "should": "~1.1.0",
     "mocha-lcov-reporter": "~0.0.1",
+    "sinon": "*",
     "coveralls": "~2.0.7",
     "blanket": "~1.1.4",
     "connect": "*"
@@ -19,6 +20,9 @@
     "url" : "https://github.com/popomore/connect-combo.git"
   },
   "scripts": {
-    "test": "make test"
+    "test": "make test",
+    "blanket": {
+      "pattern": "//^((?!(node_modules|test)).)*$/"
+    }
   }
 }
