@@ -2,6 +2,9 @@
 
 Connect middleware for assets combo
 
+[![Build Status](https://travis-ci.org/popomore/connect-combo.png?branch=master)](https://travis-ci.org/popomore/connect-combo)
+[![Coverage Status](https://coveralls.io/repos/popomore/connect-combo/badge.png?branch=master)](https://coveralls.io/r/popomore/connect-combo?branch=master)
+
 ---
 
 ## Install
