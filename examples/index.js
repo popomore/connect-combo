@@ -5,7 +5,8 @@ var connect = require('connect');
 var app = connect()
   .use(combo({
     directory: path.join(__dirname, '../test/fixture'),
-    proxy: 'https://a.alipayobjects.com'
+    proxy: 'https://a.alipayobjects.com',
+    cache: true
   }))
   .use(function(req, res) {
     res.end('Hello from Connect!\n');
