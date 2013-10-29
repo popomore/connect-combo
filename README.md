@@ -1,6 +1,6 @@
 # connect-combo
 
-Connect middleware for assets combo
+Connect middleware for assets combo, resolve url like `http://127.0.0.1??a.js,b.js`.
 
 [![Build Status](https://travis-ci.org/popomore/connect-combo.png?branch=master)](https://travis-ci.org/popomore/connect-combo)
 [![Coverage Status](https://coveralls.io/repos/popomore/connect-combo/badge.png?branch=master)](https://coveralls.io/r/popomore/connect-combo?branch=master)
