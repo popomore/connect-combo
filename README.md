@@ -26,6 +26,10 @@ See [example](https://github.com/popomore/connect-combo/blob/master/examples/ind
 
 - `proxy` specify remote server, default `false`.
 
+- `cache` cache file from remote server, default `false`.
+
+- `log` show log on terminal, default `false`.
+
 ## License
 
 MIT
