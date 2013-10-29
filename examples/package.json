@@ -1,0 +1,12 @@
+{
+  "family": "example",
+  "name": "static-server",
+  "version": "0.1.0",
+  "spm": {
+    "alias": {
+      "seajs": "seajs/seajs/2.1.1/sea",
+      "seajs-combo": "seajs/seajs-combo/1.0.0/seajs-combo",
+      "dialog": "arale/dialog/1.2.4/dialog"
+    }
+  }
+}

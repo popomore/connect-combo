@@ -2,13 +2,15 @@ var combo = require('../');
 var path = require('path');
 var connect = require('connect');
 
+var dir = path.join(__dirname, 'sea-modules');
+
 var app = connect()
   .use(combo({
-    directory: path.join(__dirname, '../test/fixture'),
+    directory: dir,
     proxy: 'https://a.alipayobjects.com',
-    cache: true
+    cache: true,
+    log: true
   }))
-  .use(function(req, res) {
-    res.end('Hello from Connect!\n');
-  })
+  .use(connect.static(dir))
+  //.use(connect.directory(__dirname))
   .listen(3000);
