@@ -1,3 +1,4 @@
 node_modules
 coverage.html
 test/fixture/seajs/
+examples/sea-modules/arale/class/
