@@ -12,5 +12,4 @@ var app = connect()
     log: true
   }))
   .use(connect.static(dir))
-  //.use(connect.directory(__dirname))
   .listen(3000);
