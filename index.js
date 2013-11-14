@@ -74,7 +74,7 @@ module.exports = function combo(options) {
     if (files && files.length) {
       log('Request ' + req.url);
       var exts = getExt(files);
-      if (exts !== 1) {
+      if (exts.length !== 1) {
         res.writeHead(400, {'Content-Type': 'text/html'});
         res.end('400 Bad Request');
       } else {
@@ -129,14 +129,15 @@ function normalize(url) {
 }
 
 function getExt(files) {
-  return files.map(function(file) {
+  files = files.map(function(file) {
     var m = file.match(/\.([a-z]*)$/);
     return m ? m[1] : '';
   }).reduce(function(p,c){
-    if (Object.prototype.toString.call(p) !== '[object Array]') p = [p];
+    if (!isArray(p)) p = [p];
     if (c !== '' && p.indexOf(c) === -1) p.push(c);
     return p;
   });
+  return isArray(files) ? files : [files];
 }
 
 function writeFileSync(filePath, data) {
@@ -158,3 +159,8 @@ function extend(target, src) {
   }
   return result;
 }
+
+function isArray(arr) {
+  return Object.prototype.toString.call(arr) === '[object Array]';
+}
+
