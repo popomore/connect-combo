@@ -102,8 +102,6 @@ module.exports = function combo(options) {
           }
         });
       }
-    } else if (options.single) {
-
     } else {
       // next middleware
       next();
