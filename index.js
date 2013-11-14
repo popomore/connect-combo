@@ -4,6 +4,7 @@ var async = require('async');
 var format = require('util').format;
 var url = require('url');
 var mime = require('mime');
+var concat = require('concat-stream');
 var protocol = {
   http: require('http'),
   https: require('https')
@@ -44,22 +45,16 @@ module.exports = function combo(options) {
         callback(new Error(res.statusCode));
         return;
       }
-  
-      var data = '';
-      res.on('data', function(buf) {
-        data += buf;
-      });
-      res.on('end', function() {
+      res.pipe(concat(function(data) {
         log('Found ' + u);
-
         if (options.cache) {
-          log('Cached ' + u);
           var file = path.join(options.directory, parsed.path);
-          writeFileSync(file, data);
+          writeFile(file, data, function(err) {
+            !err && log('Cached ' + u);
+          });
         }
-  
         callback(null, data);
-      });
+      }));
     }).on('error', function(e) {
       log('Not Found ' + u);
       callback(e);
@@ -142,14 +137,14 @@ function getExt(files) {
   return Array.isArray(files) ? files : [files];
 }
 
-function writeFileSync(filePath, data) {
+function writeFile(filePath, data, cb) {
   var dirname = path.dirname(filePath);
   var dirs = dirname.split('/');
   for (var i = 2; i <= dirs.length; i++) {
     var p = dirs.slice(0, i).join('/');
     !fs.existsSync(p) && fs.mkdirSync(p);
   }
-  fs.writeFileSync(filePath, data);
+  fs.writeFile(filePath, data, cb);
 }
 
 function extend(target, src) {
