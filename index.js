@@ -3,6 +3,7 @@ var fs = require('fs');
 var async = require('async');
 var format = require('util').format;
 var url = require('url');
+var mime = require('mime');
 var protocol = {
   http: require('http'),
   https: require('https')
@@ -101,6 +102,7 @@ module.exports = function combo(options) {
             res.writeHead(404, {'Content-Type': 'text/html'});
             res.end('404 Not Found');
           } else {
+            res.writeHead(200, {'Content-Type': mime.lookup(exts[0])});
             res.end(results.join(''));
           }
         });
