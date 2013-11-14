@@ -73,32 +73,39 @@ module.exports = function combo(options) {
     var files = normalize(req.url);
     if (files && files.length) {
       log('Request ' + req.url);
-      async.map(files, function(item, done) {
-        var filePath = path.join(options.directory, item);
-        fs.readFile(filePath, function(err, data) {
-          if (!err) {
-            // find file from directory
-            log('Found ' + filePath);
-            done(null, data.toString());
-          } else {
-            log('Not Found ' + filePath);
-            if (options.proxy) {
-              // find file from remote server
-              getRemote(url.resolve(options.proxy, item), done);
+      if (!isSameExt(files)) {
+        res.writeHead(400, {'Content-Type': 'text/html'});
+        res.end('400 Bad Request');
+      } else {
+        async.map(files, function(item, done) {
+          var filePath = path.join(options.directory, item);
+          fs.readFile(filePath, function(err, data) {
+            if (!err) {
+              // find file from directory
+              log('Found ' + filePath);
+              done(null, data.toString());
             } else {
-              // not found
-              done(err);
+              log('Not Found ' + filePath);
+              if (options.proxy) {
+                // find file from remote server
+                getRemote(url.resolve(options.proxy, item), done);
+              } else {
+                // not found
+                done(err);
+              }
             }
+          });
+        }, function(err, results){
+          if (err) {
+            res.writeHead(404, {'Content-Type': 'text/html'});
+            res.end('404 Not Found');
+          } else {
+            res.end(results.join(''));
           }
         });
-      }, function(err, results){
-        if (err) {
-          res.writeHead(404, {'Content-Type': 'text/html'});
-          res.end('404 Not Found');
-        } else {
-          res.end(results.join(''));
-        }
-      });
+      }
+    } else if (options.single) {
+
     } else {
       // next middleware
       next();
@@ -118,6 +125,17 @@ function normalize(url) {
         return path.join(base, item);
       });
   }
+}
+
+function isSameExt(files) {
+  return files.map(function(file) {
+    var m = file.match(/\.([a-z]*)$/);
+    return m ? m[1] : '';
+  }).reduce(function(p,c){
+    if (Object.prototype.toString.call(p) !== '[object Array]') p = [p];
+    if (c !== '' && p.indexOf(c) === -1) p.push(c);
+    return p;
+  }).length === 1;
 }
 
 function writeFileSync(filePath, data) {
