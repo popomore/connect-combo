@@ -3,7 +3,9 @@
   "version": "0.2.0",
   "description": "connect middleware for assets combo.",
   "dependencies": {
-    "async": "~0.2.9"
+    "async": "~0.2.9",
+    "concat-stream": "~1.1.0",
+    "mime": "~1.2.11"
   },
   "devDependencies": {
     "mocha": "~1.8.1",
