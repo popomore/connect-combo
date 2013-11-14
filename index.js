@@ -73,7 +73,8 @@ module.exports = function combo(options) {
     var files = normalize(req.url);
     if (files && files.length) {
       log('Request ' + req.url);
-      if (!isSameExt(files)) {
+      var exts = getExt(files);
+      if (exts !== 1) {
         res.writeHead(400, {'Content-Type': 'text/html'});
         res.end('400 Bad Request');
       } else {
@@ -127,7 +128,7 @@ function normalize(url) {
   }
 }
 
-function isSameExt(files) {
+function getExt(files) {
   return files.map(function(file) {
     var m = file.match(/\.([a-z]*)$/);
     return m ? m[1] : '';
@@ -135,7 +136,7 @@ function isSameExt(files) {
     if (Object.prototype.toString.call(p) !== '[object Array]') p = [p];
     if (c !== '' && p.indexOf(c) === -1) p.push(c);
     return p;
-  }).length === 1;
+  });
 }
 
 function writeFileSync(filePath, data) {
