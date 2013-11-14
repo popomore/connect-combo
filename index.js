@@ -135,11 +135,11 @@ function getExt(files) {
     var m = file.match(/\.([a-z]*)$/);
     return m ? m[1] : '';
   }).reduce(function(p,c){
-    if (!isArray(p)) p = [p];
+    if (!Array.isArray(p)) p = [p];
     if (c !== '' && p.indexOf(c) === -1) p.push(c);
     return p;
   });
-  return isArray(files) ? files : [files];
+  return Array.isArray(files) ? files : [files];
 }
 
 function writeFileSync(filePath, data) {
@@ -161,8 +161,3 @@ function extend(target, src) {
   }
   return result;
 }
-
-function isArray(arr) {
-  return Object.prototype.toString.call(arr) === '[object Array]';
-}
-
