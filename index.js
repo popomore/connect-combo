@@ -3,6 +3,8 @@ var async = require('async');
 var mime = require('mime');
 var File = require('./lib/file');
 
+module.exports = combo;
+module.exports.File = File;
 
 var defaults = {
   // local directory
@@ -22,7 +24,7 @@ var defaults = {
   static: false
 };
 
-module.exports = function combo(options) {
+function combo(options) {
 
   options = extend(defaults, options);
 
@@ -70,7 +72,7 @@ module.exports = function combo(options) {
       next();
     }
   };
-};
+}
 
 // '/a??b.js,c/d.js' => ['a/b.js', 'a/c/d.js']
 function normalize(url) {

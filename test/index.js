@@ -7,7 +7,7 @@ var sinon = require('sinon');
 
 var combo = require('../index');
 
-describe('combo', function() {
+describe('Combo', function() {
 
   var server;
   afterEach(function() {
@@ -21,7 +21,8 @@ describe('combo', function() {
 
     it('should combo different directory', function(done) {
       server = createServer(options, function() {
-        request('http://127.0.0.1:3000??a.js,b.js,c/d.js', function(err, data) {
+        request('http://127.0.0.1:3000??a.js,b.js,c/d.js', function(err, data, res) {
+          res.headers['content-type'].should.be.eql('application/javascript');
           data.should.eql('define("a", function(){});define("b", function(){});define("d", function(){});');
           done();
         });
@@ -50,14 +51,14 @@ describe('combo', function() {
   describe('remote', function() {
     var options = {
       directory: path.join(__dirname, './fixture'),
-      proxy: 'https://a.alipayobjects.com'
+      proxy: 'http://static.alipayobjects.com'
     };
 
     it('should combo different directory', function(done) {
       server = createServer(options, function() {
-        request('http://127.0.0.1:3000??a.js,seajs/seajs/2.1.1/sea.js', function(err, data) {
-          var seajs = fs.readFileSync(path.join(__dirname, './fixture/sea.js')).toString();
-          data.should.eql('define("a", function(){});' + seajs);
+        request('http://127.0.0.1:3000??a.js,arale/widget/1.0.0/widget.js', function(err, data) {
+          var widget = fs.readFileSync(path.join(__dirname, './fixture/widget.js')).toString();
+          data.should.eql('define("a", function(){});' + widget);
           done();
         });
       });
@@ -65,7 +66,7 @@ describe('combo', function() {
 
     it('should 404 when not found', function(done) {
       server = createServer(options, function() {
-        request('http://127.0.0.1:3000??a.js,seajs/seajs/0.1.0/sea.js', function(err, data) {
+        request('http://127.0.0.1:3000??a.js,not-exist.js', function(err, data) {
           err.should.eql(404);
           done();
         });
@@ -73,34 +74,49 @@ describe('combo', function() {
     });
   });
 
-  it('should cache file from remote server', function(done) {
-    var seajsPath = path.join(__dirname, './fixture/seajs/seajs/2.1.1/sea.js');
+  describe('static', function() {
     var options = {
       directory: path.join(__dirname, './fixture'),
-      proxy: 'https://a.alipayobjects.com',
-      cache: true
+      static: true
     };
 
-    fs.existsSync(seajsPath) && fs.unlinkSync(seajsPath);
-    server = createServer(options, function() {
-      request('http://127.0.0.1:3000??a.js,seajs/seajs/2.1.1/sea.js', function(err, data) {
-        fs.existsSync(seajsPath).should.be.true;
-        done();
+    it('should return right', function(done) {
+      server = createServer(options, function() {
+        request('http://127.0.0.1:3000/a.js', function(err, data) {
+          data.should.eql('define("a", function(){});');
+          done();
+        });
+      });
+    });
+
+    it('should return 404 when not found', function(done) {
+      server = createServer(options, function() {
+        request('http://127.0.0.1:3000/not-exist.js', function(err, data) {
+          err.should.eql(404);
+          done();
+        });
       });
     });
   });
 
   it('should show log', function(done) {
+    var log = console.log;
+    var spy = sinon.spy();
+    console.log = function() {
+      spy.apply(null, arguments);
+    };
     var options = {
       directory: path.join(__dirname, './fixture'),
+      proxy: 'http://ajax.googleapis.com',
+      cache: true,
       log: true
     };
-    var spy = sinon.spy(console, 'log');
 
     server = createServer(options, function() {
-      request('http://127.0.0.1:3000??a.js,b.js', function(err, data) {
+      request('http://127.0.0.1:3000??a.js,ajax/libs/jquery/1.5.1/jquery.min.js', function(err, data) {
         spy.calledWithMatch(/>> Found .*\/test\/fixture\/a.js/)
           .should.be.true;
+        console.log = log;
         done();
       });
     });
@@ -151,7 +167,7 @@ function request(url, callback) {
       data += buf;
     });
     res.on('end', function() {
-      callback(null, data.toString());
+      callback(null, data.toString(), res);
     });
   });
 }
