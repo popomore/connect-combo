@@ -2,7 +2,6 @@ var path = require('path');
 var async = require('async');
 var format = require('util').format;
 var mime = require('mime');
-var log = require('./lib/log');
 var File = require('./lib/file');
 
 
@@ -38,9 +37,10 @@ module.exports = function combo(options) {
         res.end('400 Bad Request');
       } else {
         async.map(files, function(item, done) {
-          new File(item, options).end(function(err, data) {
+          var f = new File(item, options).end(function(err, data) {
             done(err, data);
           });
+          logFile(f, options);
         }, function(err, results){
           if (err) {
             res.writeHead(404, {'Content-Type': 'text/html'});
@@ -54,7 +54,7 @@ module.exports = function combo(options) {
     } else if (options.static) {
       log('Request ' + req.url, options);
       var file = req.url;
-      new File(file, options).end(function(err, data) {
+      var f = new File(file, options).end(function(err, data) {
         if (err) {
           res.writeHead(404, {'Content-Type': 'text/html'});
           res.end('404 Not Found');
@@ -63,6 +63,7 @@ module.exports = function combo(options) {
           res.end(data);
         }
       });
+      logFile(f, options);
     } else {
       // next middleware
       next();
@@ -81,6 +82,23 @@ function normalize(url) {
         return path.join(base, item);
       });
   }
+}
+
+function logFile(file, options) {
+  file
+    .on('found', function(str) {
+      log('Found ' + str, options);
+    })
+    .on('not found', function(str) {
+      log('Not Found ' + str, options);
+    })
+    .on('cached', function(str) {
+      log('Cached ' + str, options);
+    });
+}
+
+function log(str, options) {
+  options.log && console.log('>> ' + str);
 }
 
 function isCombo(url) {
