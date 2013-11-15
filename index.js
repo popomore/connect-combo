@@ -47,7 +47,10 @@ function combo(options) {
             res.writeHead(404, {'Content-Type': 'text/html'});
             res.end('404 Not Found');
           } else {
-            res.writeHead(200, {'Content-Type': mime.lookup(exts[0])});
+            res.writeHead(200, {
+              'Content-Type': mime.lookup(exts[0]),
+              'Date': new Date().toUTCString()
+            });
             res.end(results.join(''));
           }
         });
@@ -61,7 +64,10 @@ function combo(options) {
           res.writeHead(404, {'Content-Type': 'text/html'});
           res.end('404 Not Found');
         } else {
-          res.writeHead(200, {'Content-Type': getExt(file)[0]});
+          res.writeHead(200, {
+            'Content-Type': getExt(file)[0],
+            'Date': new Date().toUTCString()
+          });
           res.end(data);
         }
       });
