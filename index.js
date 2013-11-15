@@ -17,7 +17,11 @@ var defaults = {
   cache: false,
 
   // show log
-  log: false
+  log: false,
+
+  // serve as normal static server, also support proxy,
+  // or you can use `connect.static` without proxy
+  static: false
 };
 
 module.exports = function combo(options) {
@@ -25,9 +29,9 @@ module.exports = function combo(options) {
   options = extend(defaults, options);
 
   return function(req, res, next) {
-    var files = normalize(req.url);
-    if (files && files.length) {
+    if (isCombo(req.url)) {
       log('Request ' + req.url, options);
+      var files = normalize(req.url);
       var exts = getExt(files);
       if (exts.length !== 1) {
         res.writeHead(400, {'Content-Type': 'text/html'});
@@ -47,6 +51,18 @@ module.exports = function combo(options) {
           }
         });
       }
+    } else if (options.static) {
+      log('Request ' + req.url, options);
+      var file = req.url;
+      new File(file, options).end(function(err, data) {
+        if (err) {
+          res.writeHead(404, {'Content-Type': 'text/html'});
+          res.end('404 Not Found');
+        } else {
+          res.writeHead(200, {'Content-Type': getExt(file)[0]});
+          res.end(data);
+        }
+      });
     } else {
       // next middleware
       next();
@@ -67,10 +83,16 @@ function normalize(url) {
   }
 }
 
+function isCombo(url) {
+  return /\?\?/.test(url);
+}
+
+// get file extension
+// support single file and combo file
 function getExt(files) {
+  files = Array.isArray(files) ? files : [files];
   files = files.map(function(file) {
-    var m = file.match(/\.([a-z]*)$/);
-    return m ? m[1] : '';
+    return path.extname(file);
   }).reduce(function(p,c){
     if (!Array.isArray(p)) p = [p];
     if (c !== '' && p.indexOf(c) === -1) p.push(c);

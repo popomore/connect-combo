@@ -9,7 +9,7 @@ var app = connect()
     directory: dir,
     proxy: 'https://a.alipayobjects.com',
     cache: true,
-    log: true
+    log: true,
+    static: true
   }))
-  .use(connect.static(dir))
   .listen(3000);
