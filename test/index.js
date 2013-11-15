@@ -114,6 +114,15 @@ describe('combo', function() {
       });
     });
   });
+
+  it('should return 400 when different ext', function(done) {
+    server = createServer(function() {
+      request('http://127.0.0.1:3000??a.js,a.css', function(err, data) {
+        err.should.eql(400);
+        done();
+      });
+    });
+  });
 });
 
 function createServer(options, callback) {
