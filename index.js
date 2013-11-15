@@ -1,6 +1,5 @@
 var path = require('path');
 var async = require('async');
-var format = require('util').format;
 var mime = require('mime');
 var File = require('./lib/file');
 
@@ -51,6 +50,7 @@ module.exports = function combo(options) {
           }
         });
       }
+
     } else if (options.static) {
       log('Request ' + req.url, options);
       var file = req.url;
@@ -64,6 +64,7 @@ module.exports = function combo(options) {
         }
       });
       logFile(f, options);
+
     } else {
       // next middleware
       next();
@@ -118,7 +119,6 @@ function getExt(files) {
   });
   return Array.isArray(files) ? files : [files];
 }
-
 
 function extend(target, src) {
   var result = {};
