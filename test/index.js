@@ -40,7 +40,7 @@ describe('Combo', function() {
 
     it('should return 404 when not found', function(done) {
       server = createServer(options, function() {
-        request('http://127.0.0.1:3000??a.js,c.js', function(err, data) {
+        request('http://127.0.0.1:3000??a.js,c.js', function(err) {
           err.should.eql(404);
           done();
         });
@@ -66,7 +66,7 @@ describe('Combo', function() {
 
     it('should 404 when not found', function(done) {
       server = createServer(options, function() {
-        request('http://127.0.0.1:3000??a.js,not-exist.js', function(err, data) {
+        request('http://127.0.0.1:3000??a.js,not-exist.js', function(err) {
           err.should.eql(404);
           done();
         });
@@ -91,7 +91,7 @@ describe('Combo', function() {
 
     it('should return 404 when not found', function(done) {
       server = createServer(options, function() {
-        request('http://127.0.0.1:3000/not-exist.js', function(err, data) {
+        request('http://127.0.0.1:3000/not-exist.js', function(err) {
           err.should.eql(404);
           done();
         });
@@ -113,7 +113,7 @@ describe('Combo', function() {
     };
 
     server = createServer(options, function() {
-      request('http://127.0.0.1:3000??a.js,ajax/libs/jquery/1.5.1/jquery.min.js', function(err, data) {
+      request('http://127.0.0.1:3000??a.js,ajax/libs/jquery/1.5.1/jquery.min.js', function() {
         spy.calledWithMatch(/>> Found .*\/test\/fixture\/a.js/)
           .should.be.true;
         console.log = log;
@@ -133,8 +133,25 @@ describe('Combo', function() {
 
   it('should return 400 when different ext', function(done) {
     server = createServer(function() {
-      request('http://127.0.0.1:3000??a.js,a.css', function(err, data) {
+      request('http://127.0.0.1:3000??a.js,a.css', function(err) {
         err.should.eql(400);
+        done();
+      });
+    });
+  });
+
+  it('directory function', function(done) {
+    var options = {
+      static: true,
+      directory: function(req) {
+        var dir = req.url.split('?')[1].split('=')[1];
+        return path.join(__dirname, 'fixture', dir);
+      }
+    };
+
+    server = createServer(options, function() {
+      request('http://127.0.0.1:3000/d.js?dir=c', function(err, data) {
+        data.should.eql('define("d", function(){});');
         done();
       });
     });

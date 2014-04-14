@@ -28,7 +28,14 @@ function combo(options) {
 
   options = extend(defaults, options);
 
+  var directory = options.directory;
+  var getDir = typeof options.directory === 'string'?
+    function() {return directory;} : options.directory;
+
   return function(req, res, next) {
+
+    options.directory = getDir(req);
+
     if (isCombo(req.url)) {
       log('Request ' + req.url, options);
       var files = normalize(req.url);
