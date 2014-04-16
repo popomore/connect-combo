@@ -72,7 +72,7 @@ function combo(options) {
           res.end('404 Not Found');
         } else {
           res.writeHead(200, {
-            'Content-Type': getExt(file)[0],
+            'Content-Type': mime.lookup(getExt(file)[0]),
             'Date': new Date().toUTCString()
           });
           res.end(data);
