@@ -29,20 +29,6 @@ describe('Combo', function() {
       });
     });
 
-    it('css content-type static', function(done) {
-      var options = {
-        directory: path.join(__dirname, './fixture'),
-        static: true
-      };
-      server = createServer(options, function() {
-        request('http://127.0.0.1:3000/a.css', function(err, data, res) {
-          res.headers['content-type'].should.be.eql('text/css');
-          //data.should.eql('define("a", function(){});define("b", function(){});define("d", function(){});');
-          done();
-        });
-      });
-    });
-
     it('should combo same directory', function(done) {
       server = createServer(options, function() {
         request('http://127.0.0.1:3000/c??d.js,e.js', function(err, data) {
@@ -107,6 +93,16 @@ describe('Combo', function() {
       server = createServer(options, function() {
         request('http://127.0.0.1:3000/not-exist.js', function(err) {
           err.should.eql(404);
+          done();
+        });
+      });
+    });
+
+    it('content-type', function(done) {
+      server = createServer(options, function() {
+        request('http://127.0.0.1:3000/a.css', function(err, data, res) {
+          res.headers['content-type'].should.be.eql('text/css');
+          //data.should.eql('define("a", function(){});define("b", function(){});define("d", function(){});');
           done();
         });
       });
