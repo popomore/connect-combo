@@ -1,6 +1,7 @@
 var path = require('path');
 var async = require('async');
 var mime = require('mime');
+var parse = require('url').parse;
 var File = require('./lib/file');
 
 module.exports = combo;
@@ -33,21 +34,20 @@ function combo(options) {
     function() {return directory;} : options.directory;
 
   return function(req, res, next) {
-
     options.directory = getDir(req);
 
-    if (isCombo(req.url)) {
+    var files = normalize(req.url);
+    var exts = getExt(files);
+
+    if (files.length > 1) {
       log('Request ' + req.url, options);
-      var files = normalize(req.url);
-      var exts = getExt(files);
+
       if (exts.length !== 1) {
         res.writeHead(400, {'Content-Type': 'text/html'});
         res.end('400 Bad Request');
       } else {
         async.map(files, function(item, done) {
-          var f = new File(item, options).end(function(err, data) {
-            done(err, data);
-          });
+          var f = new File(item, options).end(done);
           logFile(f, options);
         }, function(err, results){
           if (err) {
@@ -58,21 +58,20 @@ function combo(options) {
               'Content-Type': mime.lookup(exts[0]),
               'Date': new Date().toUTCString()
             });
-            res.end(results.join(''));
+            res.end(results.join('\n'));
           }
         });
       }
-
     } else if (options.static) {
       log('Request ' + req.url, options);
-      var file = req.url;
-      var f = new File(file, options).end(function(err, data) {
+
+      var f = new File(files[0], options).end(function(err, data) {
         if (err) {
           res.writeHead(404, {'Content-Type': 'text/html'});
           res.end('404 Not Found');
         } else {
           res.writeHead(200, {
-            'Content-Type': mime.lookup(getExt(file)[0]),
+            'Content-Type': mime.lookup(exts[0]),
             'Date': new Date().toUTCString()
           });
           res.end(data);
@@ -89,15 +88,32 @@ function combo(options) {
 
 // '/a??b.js,c/d.js' => ['a/b.js', 'a/c/d.js']
 function normalize(url) {
-  var m = url.split(/\?\?/);
-  if (m.length === 2) {
-    var base = m[0];
-    return m[1]
+  url = parse(url);
+  var comboPath = extractComboPath(url.query);
+  if (comboPath) {
+    var base = url.pathname;
+    return comboPath
       .split(',')
       .map(function(item) {
+        item = parse(item).pathname;
         return path.join(base, item);
-      });
+      });  
+  } else {
+    return [url.pathname];
   }
+}
+
+// /??a.js,b.js&c=d => a.js,b.js
+function extractComboPath(query) {
+  if (!query) { return; }
+  var ret;
+  query.split('&')
+    .forEach(function(item) {
+      if (!ret && item.charAt(0) === '?') {
+        ret = item.substring(1);
+      }
+    });
+  return ret;
 }
 
 function logFile(file, options) {
@@ -117,22 +133,14 @@ function log(str, options) {
   options.log && console.log('>> ' + str);
 }
 
-function isCombo(url) {
-  return /\?\?/.test(url);
-}
-
 // get file extension
 // support single file and combo file
 function getExt(files) {
-  files = Array.isArray(files) ? files : [files];
-  files = files.map(function(file) {
+  return files.map(function(file) {
     return path.extname(file);
-  }).reduce(function(p,c){
-    if (!Array.isArray(p)) p = [p];
-    if (c !== '' && p.indexOf(c) === -1) p.push(c);
-    return p;
+  }).filter(function(item, index, arr) {
+    return index === arr.indexOf(item);
   });
-  return Array.isArray(files) ? files : [files];
 }
 
 function extend(target, src) {

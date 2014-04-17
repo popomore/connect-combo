@@ -23,7 +23,7 @@ describe('Combo', function() {
       server = createServer(options, function() {
         request('http://127.0.0.1:3000??a.js,b.js,c/d.js', function(err, data, res) {
           res.headers['content-type'].should.be.eql('application/javascript');
-          data.should.eql('define("a", function(){});define("b", function(){});define("d", function(){});');
+          data.should.eql('define("a", function(){});\ndefine("b", function(){});\ndefine("d", function(){});');
           done();
         });
       });
@@ -32,7 +32,7 @@ describe('Combo', function() {
     it('should combo same directory', function(done) {
       server = createServer(options, function() {
         request('http://127.0.0.1:3000/c??d.js,e.js', function(err, data) {
-          data.should.eql('define("d", function(){});define("e", function(){});');
+          data.should.eql('define("d", function(){});\ndefine("e", function(){});');
           done();
         });
       });
@@ -58,7 +58,7 @@ describe('Combo', function() {
       server = createServer(options, function() {
         request('http://127.0.0.1:3000??a.js,arale/widget/1.0.0/widget.js', function(err, data) {
           var widget = fs.readFileSync(path.join(__dirname, './fixture/widget.js')).toString();
-          data.should.eql('define("a", function(){});' + widget);
+          data.should.eql('define("a", function(){});\n' + widget);
           done();
         });
       });
@@ -98,15 +98,66 @@ describe('Combo', function() {
       });
     });
 
-    it('content-type', function(done) {
+    it('should return right with query', function(done) {
       server = createServer(options, function() {
-        request('http://127.0.0.1:3000/a.css', function(err, data, res) {
-          res.headers['content-type'].should.be.eql('text/css');
-          //data.should.eql('define("a", function(){});define("b", function(){});define("d", function(){});');
+        request('http://127.0.0.1:3000/a.js?a', function(err, data) {
+          data.should.eql('define("a", function(){});');
           done();
         });
       });
     });
+  });
+
+  describe('content type', function() {
+    it('static', function(done) {
+      var options = {
+        directory: path.join(__dirname, './fixture'),
+        static: true
+      };
+      server = createServer(options, function() {
+        request('http://127.0.0.1:3000/a.css', function(err, data, res) {
+          res.headers['content-type'].should.be.eql('text/css');
+          done();
+        });
+      });
+    });
+
+    it('combo', function(done) {
+      var options = {
+        directory: path.join(__dirname, './fixture')
+      };
+      server = createServer(options, function() {
+        request('http://127.0.0.1:3000/??a.js,b.js', function(err, data, res) {
+          res.headers['content-type'].should.be.eql('application/javascript');
+          done();
+        });
+      });
+    });
+
+    it('400', function(done) {
+      var options = {
+        directory: path.join(__dirname, './fixture')
+      };
+      server = createServer(options, function() {
+        request('http://127.0.0.1:3000/??a.js,b.css', function(err) {
+          err.should.eql(400);
+          done();
+        });
+      });      
+    });
+  });
+
+
+  it('url parse with query', function(done) {
+    var options = {
+      directory: path.join(__dirname, './fixture')
+    };
+    server = createServer(options, function() {
+      request('http://127.0.0.1:3000/??a.js?123,b.js?456&input_encoding=utf-8', function(err, data) {
+        data.should.eql('define("a", function(){});\ndefine("b", function(){});');
+        done();
+      });
+    });      
   });
 
   it('should show log', function(done) {
