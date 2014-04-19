@@ -1,4 +1,5 @@
 var path = require('path');
+var debug = require('debug')('connect-combo');
 var async = require('async');
 var mime = require('mime');
 var parse = require('url').parse;
@@ -36,8 +37,11 @@ function combo(options) {
   return function(req, res, next) {
     options.directory = getDir(req);
 
+    debug('Request %s', req.url);
     var files = normalize(req.url);
+    debug('Split %s', files);
     var exts = getExt(files);
+    debug('Extension %s', exts);
 
     if (files.length > 1) {
       log('Request ' + req.url, options);
@@ -109,8 +113,9 @@ function extractComboPath(query) {
   var ret;
   query.split('&')
     .forEach(function(item) {
+      item = decodeURIComponent(item);
       if (!ret && item.charAt(0) === '?') {
-        ret = item.substring(1);
+        ret = item.substring(1).split('=')[0];
       }
     });
   return ret;

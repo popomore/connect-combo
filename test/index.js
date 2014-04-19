@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
-var http = require('http');
 var connect = require('connect');
+var request = require('supertest');
 require('should');
 var sinon = require('sinon');
 
@@ -9,42 +9,34 @@ var combo = require('../index');
 
 describe('Combo', function() {
 
-  var server;
-  afterEach(function() {
-    server.close();
-  });
-
   describe('local', function() {
     var options = {
       directory: path.join(__dirname, './fixture')
     };
 
     it('should combo different directory', function(done) {
-      server = createServer(options, function() {
-        request('http://127.0.0.1:3000??a.js,b.js,c/d.js', function(err, data, res) {
-          res.headers['content-type'].should.be.eql('application/javascript');
-          data.should.eql('define("a", function(){});\ndefine("b", function(){});\ndefine("d", function(){});');
-          done();
-        });
-      });
+      var app = createServer(options);
+      request(app)
+        .get('/??a.js,b.js,c/d.js')
+        .expect('Content-Type', 'application/javascript')
+        .expect('define("a", function(){});\ndefine("b", function(){});\ndefine("d", function(){});')
+        .end(done);
     });
 
     it('should combo same directory', function(done) {
-      server = createServer(options, function() {
-        request('http://127.0.0.1:3000/c??d.js,e.js', function(err, data) {
-          data.should.eql('define("d", function(){});\ndefine("e", function(){});');
-          done();
-        });
-      });
+      var app = createServer(options);
+      request(app)
+        .get('/c??d.js,e.js')
+        .expect('Content-Type', 'application/javascript')
+        .expect('define("d", function(){});\ndefine("e", function(){});')
+        .end(done);
     });
 
     it('should return 404 when not found', function(done) {
-      server = createServer(options, function() {
-        request('http://127.0.0.1:3000??a.js,c.js', function(err) {
-          err.should.eql(404);
-          done();
-        });
-      });
+      var app = createServer(options);
+      request(app)
+        .get('/??a.js,c.js')
+        .expect(404, done);
     });
   });
 
@@ -55,22 +47,19 @@ describe('Combo', function() {
     };
 
     it('should combo different directory', function(done) {
-      server = createServer(options, function() {
-        request('http://127.0.0.1:3000??a.js,arale/widget/1.0.0/widget.js', function(err, data) {
-          var widget = fs.readFileSync(path.join(__dirname, './fixture/widget.js')).toString();
-          data.should.eql('define("a", function(){});\n' + widget);
-          done();
-        });
-      });
+      var app = createServer(options);
+      var widget = fs.readFileSync(path.join(__dirname, './fixture/widget.js')).toString();
+      request(app)
+        .get('/??a.js,arale/widget/1.0.0/widget.js')
+        .expect('define("a", function(){});\n' + widget)
+        .end(done);
     });
 
     it('should 404 when not found', function(done) {
-      server = createServer(options, function() {
-        request('http://127.0.0.1:3000??a.js,not-exist.js', function(err) {
-          err.should.eql(404);
-          done();
-        });
-      });
+      var app = createServer(options);
+      request(app)
+        .get('/??a.js,not-exist.js')
+        .expect(404, done);
     });
   });
 
@@ -81,30 +70,24 @@ describe('Combo', function() {
     };
 
     it('should return right', function(done) {
-      server = createServer(options, function() {
-        request('http://127.0.0.1:3000/a.js', function(err, data) {
-          data.should.eql('define("a", function(){});');
-          done();
-        });
-      });
+      var app = createServer(options);
+      request(app)
+        .get('/a.js')
+        .expect('define("a", function(){});', done);
     });
 
     it('should return 404 when not found', function(done) {
-      server = createServer(options, function() {
-        request('http://127.0.0.1:3000/not-exist.js', function(err) {
-          err.should.eql(404);
-          done();
-        });
-      });
+      var app = createServer(options);
+      request(app)
+        .get('/not-exist.js')
+        .expect(404, done);
     });
 
     it('should return right with query', function(done) {
-      server = createServer(options, function() {
-        request('http://127.0.0.1:3000/a.js?a', function(err, data) {
-          data.should.eql('define("a", function(){});');
-          done();
-        });
-      });
+      var app = createServer(options);
+      request(app)
+        .get('/a.js?a')
+        .expect('define("a", function(){});', done);
     });
   });
 
@@ -114,36 +97,32 @@ describe('Combo', function() {
         directory: path.join(__dirname, './fixture'),
         static: true
       };
-      server = createServer(options, function() {
-        request('http://127.0.0.1:3000/a.css', function(err, data, res) {
-          res.headers['content-type'].should.be.eql('text/css');
-          done();
-        });
-      });
+      var app = createServer(options);
+      request(app)
+        .get('/a.css')
+        .expect('Content-Type', 'text/css')
+        .end(done);
     });
 
     it('combo', function(done) {
       var options = {
         directory: path.join(__dirname, './fixture')
       };
-      server = createServer(options, function() {
-        request('http://127.0.0.1:3000/??a.js,b.js', function(err, data, res) {
-          res.headers['content-type'].should.be.eql('application/javascript');
-          done();
-        });
-      });
+      var app = createServer(options);
+      request(app)
+        .get('/??a.js,b.js')
+        .expect('Content-Type', 'application/javascript')
+        .end(done);
     });
 
     it('400', function(done) {
       var options = {
         directory: path.join(__dirname, './fixture')
       };
-      server = createServer(options, function() {
-        request('http://127.0.0.1:3000/??a.js,b.css', function(err) {
-          err.should.eql(400);
-          done();
-        });
-      });      
+      var app = createServer(options);
+      request(app)
+        .get('/??a.js,b.css')
+        .expect(400, done);     
     });
   });
 
@@ -152,12 +131,10 @@ describe('Combo', function() {
     var options = {
       directory: path.join(__dirname, './fixture')
     };
-    server = createServer(options, function() {
-      request('http://127.0.0.1:3000/??a.js?123,b.js?456&input_encoding=utf-8', function(err, data) {
-        data.should.eql('define("a", function(){});\ndefine("b", function(){});');
-        done();
-      });
-    });      
+    var app = createServer(options);
+    request(app)
+      .get('/??a.js?123,b.js?456&input_encoding=utf-8')
+      .expect('define("a", function(){});\ndefine("b", function(){});', done); 
   });
 
   it('should show log', function(done) {
@@ -172,33 +149,29 @@ describe('Combo', function() {
       cache: true,
       log: true
     };
-
-    server = createServer(options, function() {
-      request('http://127.0.0.1:3000??a.js,ajax/libs/jquery/1.5.1/jquery.min.js', function() {
+    var app = createServer(options);
+    request(app)
+      .get('/??a.js,ajax/libs/jquery/1.5.1/jquery.min.js')
+      .end(function() {
         spy.calledWithMatch(/>> Found .*\/test\/fixture\/a.js/)
           .should.be.true;
         console.log = log;
         done();
-      });
-    });
+      }); 
   });
 
   it('should run next middleware when do not match combo', function(done) {
-    server = createServer(function() {
-      request('http://127.0.0.1:3000?a.js,b.js', function(err, data) {
-        data.should.eql('not combo');
-        done();
-      });
-    });
+    var app = createServer();
+    request(app)
+      .get('/?a.js,b.js')
+      .expect('not combo', done); 
   });
 
   it('should return 400 when different ext', function(done) {
-    server = createServer(function() {
-      request('http://127.0.0.1:3000??a.js,a.css', function(err) {
-        err.should.eql(400);
-        done();
-      });
-    });
+    var app = createServer();
+    request(app)
+      .get('/??a.js,a.css')
+      .expect(400, done); 
   });
 
   it('directory function', function(done) {
@@ -209,19 +182,15 @@ describe('Combo', function() {
         return path.join(__dirname, 'fixture', dir);
       }
     };
-
-    server = createServer(options, function() {
-      request('http://127.0.0.1:3000/d.js?dir=c', function(err, data) {
-        data.should.eql('define("d", function(){});');
-        done();
-      });
-    });
+    var app = createServer(options);
+    request(app)
+      .get('/d.js?dir=c')
+      .expect('define("d", function(){});', done); 
   });
 });
 
-function createServer(options, callback) {
-  if (Object.prototype.toString.call(options) === '[object Function]') {
-    callback = options;
+function createServer(options) {
+  if (!options) {
     options = {
       directory: path.join(__dirname, './fixture')
     };
@@ -230,22 +199,5 @@ function createServer(options, callback) {
     .use(combo(options))
     .use(function(req, res) {
       res.end('not combo');
-    })
-    .listen(3000, callback);
-}
-
-function request(url, callback) {
-  http.get(url, function(res) {
-    if (res.statusCode !== 200) {
-      callback(res.statusCode);
-      return;
-    }
-    var data = '';
-    res.on('data', function(buf) {
-      data += buf;
     });
-    res.on('end', function() {
-      callback(null, data.toString(), res);
-    });
-  });
 }
