@@ -1,18 +1,10 @@
-version = `cat package.json | grep version | awk -F'"' '{print $$4}'`
-publish:
-	@git tag ${version}
-	@git push origin ${version}
-	@npm publish
-
 test:
-	@echo TRAVIS_JOB_ID $(TRAVIS_JOB_ID)
-	@./node_modules/.bin/mocha -t 200000 -R spec
+	./node_modules/.bin/istanbul cover  ./node_modules/.bin/_mocha -- -R spec -t 20000
 
-coverage:
-	./node_modules/.bin/mocha -t 200000 -R html-cov --require blanket  > coverage.html 
-	@open coverage.html
+coveralls: test
+	cat ./coverage/lcov.info | ./node_modules/.bin/coveralls
 
-coveralls:
-	./node_modules/.bin/mocha -t 200000 -R mocha-lcov-reporter  --require blanket | ./node_modules/.bin/coveralls
+debug:
+	node $(NODE_DEBUG) ./node_modules/.bin/_mocha -R spec -t 20000
 
 .PHONY: test

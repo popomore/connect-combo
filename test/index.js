@@ -5,7 +5,7 @@ var request = require('supertest');
 require('should');
 var sinon = require('sinon');
 
-var combo = require('../index');
+var combo = require('..');
 
 describe('Combo', function() {
 

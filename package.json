@@ -3,20 +3,19 @@
   "version": "0.2.3",
   "description": "connect middleware for assets combo.",
   "dependencies": {
-    "async": "~0.2.9",
-    "concat-stream": "~1.1.0",
-    "debug": "^0.8.0",
+    "async": "~0.7.0",
+    "concat-stream": "~1.4.5",
+    "debug": "~0.8.0",
     "mime": "~1.2.11"
   },
   "devDependencies": {
-    "blanket": "~1.1.4",
-    "connect": "*",
-    "coveralls": "~2.0.7",
-    "mocha": "~1.8.1",
-    "mocha-lcov-reporter": "~0.0.1",
-    "should": "~1.1.0",
-    "sinon": "*",
-    "supertest": "~0.11.0"
+    "istanbul": "~0.2.7",
+    "coveralls": "~2.10.0",
+    "mocha": "~1.18.2",
+    "should": "~3.3.1",
+    "sinon": "~1.9.1",
+    "supertest": "~0.11.0",
+    "connect": "~2.14.4"
   },
   "main": "index",
   "repository": {
@@ -24,9 +23,6 @@
     "url": "https://github.com/popomore/connect-combo.git"
   },
   "scripts": {
-    "test": "make test",
-    "blanket": {
-      "pattern": "//^((?!(node_modules|test)).)*$/"
-    }
+    "test": "make test"
   }
 }
