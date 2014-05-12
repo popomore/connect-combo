@@ -4,9 +4,9 @@
   "description": "connect middleware for assets combo.",
   "dependencies": {
     "async": "~0.7.0",
-    "concat-stream": "~1.4.5",
     "debug": "~0.8.0",
-    "mime": "~1.2.11"
+    "mime": "~1.2.11",
+    "urllib": "~0.5.15"
   },
   "devDependencies": {
     "istanbul": "~0.2.7",
