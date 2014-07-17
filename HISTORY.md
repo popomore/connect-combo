@@ -2,6 +2,10 @@
 
 ---
 
+## 0.2.5
+
+fix combo single file
+
 ## 0.2.4
 
 use urllib
