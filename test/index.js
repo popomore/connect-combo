@@ -38,6 +38,16 @@ describe('Combo', function() {
         .get('/??a.js,c.js')
         .expect(404, done);
     });
+
+    it('should combo one file', function(done) {
+      var app = createServer(options);
+      request(app)
+        .get('/??a.js')
+        .expect('Content-Type', 'application/javascript')
+        .expect('define("a", function(){});')
+        .end(done);
+    });
+
   });
 
   describe('remote', function() {
@@ -86,7 +96,7 @@ describe('Combo', function() {
     it('should return right with query', function(done) {
       var app = createServer(options);
       request(app)
-        .get('/a.js?a')
+        .get('/a.js?t=111')
         .expect('define("a", function(){});', done);
     });
   });
@@ -122,7 +132,7 @@ describe('Combo', function() {
       var app = createServer(options);
       request(app)
         .get('/??a.js,b.css')
-        .expect(400, done);     
+        .expect(400, done);
     });
   });
 
@@ -134,7 +144,7 @@ describe('Combo', function() {
     var app = createServer(options);
     request(app)
       .get('/??a.js?123,b.js?456&input_encoding=utf-8')
-      .expect('define("a", function(){});\ndefine("b", function(){});', done); 
+      .expect('define("a", function(){});\ndefine("b", function(){});', done);
   });
 
   it('should show log', function(done) {
@@ -157,21 +167,21 @@ describe('Combo', function() {
           .should.be.true;
         console.log = log;
         done();
-      }); 
+      });
   });
 
   it('should run next middleware when do not match combo', function(done) {
     var app = createServer();
     request(app)
       .get('/?a.js,b.js')
-      .expect('not combo', done); 
+      .expect('not combo', done);
   });
 
   it('should return 400 when different ext', function(done) {
     var app = createServer();
     request(app)
       .get('/??a.js,a.css')
-      .expect(400, done); 
+      .expect(400, done);
   });
 
   it('directory function', function(done) {
@@ -185,7 +195,7 @@ describe('Combo', function() {
     var app = createServer(options);
     request(app)
       .get('/d.js?dir=c')
-      .expect('define("d", function(){});', done); 
+      .expect('define("d", function(){});', done);
   });
 });
 

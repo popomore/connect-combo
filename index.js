@@ -11,7 +11,7 @@ module.exports.File = File;
 var defaults = {
   // local directory
   directory: process.cwd(),
-  
+
   // remote server
   proxy: '',
 
@@ -43,7 +43,8 @@ function combo(options) {
     var exts = getExt(files);
     debug('Extension %s', exts);
 
-    if (files.length > 1) {
+    var isCombo = decodeURIComponent(req.url).indexOf('??') > -1;
+    if (isCombo && files.length !== 0) {
       log('Request ' + req.url, options);
 
       if (exts.length !== 1) {
@@ -101,7 +102,7 @@ function normalize(url) {
       .map(function(item) {
         item = parse(item).pathname;
         return path.join(base, item);
-      });  
+      });
   } else {
     return [url.pathname];
   }
