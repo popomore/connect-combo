@@ -17,6 +17,26 @@ describe('File', function() {
     };
   });
 
+  it('before proxy', function(done) {
+    options.beforeProxy = function(urlPath, cb, next) {
+      if (urlPath === 'beforeproxy.js') {
+        this.emit('found');
+        cb(null, 'beforeproxy');
+      } else {
+        next();
+      }
+    };
+
+    var spy = sinon.spy();
+    new File('beforeproxy.js', options)
+      .on('found', spy)
+      .end(function(err, data) {
+        data.should.be.eql('beforeproxy');
+        spy.calledOnce.should.be.true;
+        done();
+      });
+  });
+
   it('should response from local', function(done) {
     var spy = sinon.spy();
     new File('a.js', options)

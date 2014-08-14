@@ -33,6 +33,8 @@ See [example](https://github.com/popomore/connect-combo/blob/master/examples/)
 
 - `log` show log on terminal, default `false`.
 
+- `beforeProxy` handle request before send to proxy, default `null`.
+
 ## License
 
 MIT
