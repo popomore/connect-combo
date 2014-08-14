@@ -2,6 +2,10 @@
 
 ---
 
+## 0.2.6
+
+add beforeProxy option
+
 ## 0.2.5
 
 fix combo single file
