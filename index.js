@@ -12,6 +12,8 @@ var defaults = {
   // local directory
   directory: process.cwd(),
 
+  beforeProxy: null,
+
   // remote server
   proxy: '',
 
