@@ -3,19 +3,20 @@
   "version": "0.2.6",
   "description": "connect middleware for assets combo.",
   "dependencies": {
-    "async": "~0.7.0",
-    "debug": "~0.8.0",
+    "combine-stream": "~0.0.4",
+    "combo-url": "~0.2.0",
+    "debug": "~1.0.4",
     "mime": "~1.2.11",
-    "urllib": "~0.5.15"
+    "urlproxy": "~0.1.0"
   },
   "devDependencies": {
-    "istanbul": "~0.2.7",
+    "connect": "~2.14.4",
     "coveralls": "~2.10.0",
+    "istanbul": "~0.2.7",
     "mocha": "~1.18.2",
-    "should": "~3.3.1",
-    "sinon": "~1.9.1",
-    "supertest": "~0.11.0",
-    "connect": "~2.14.4"
+    "should": "~4.0.4",
+    "sinon": "~1.10.3",
+    "supertest": "~0.13.0"
   },
   "main": "index",
   "repository": {

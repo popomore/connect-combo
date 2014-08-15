@@ -1,12 +1,13 @@
 var path = require('path');
-var debug = require('debug')('connect-combo');
-var async = require('async');
-var mime = require('mime');
 var parse = require('url').parse;
-var File = require('./lib/file');
+var debug = require('debug')('connect-combo');
+var mime = require('mime');
+var combo = require('combo-url');
+var proxy = require('urlproxy');
+var pedding = require('pedding');
+var Combine = require('combine-stream');
 
 module.exports = combo;
-module.exports.File = File;
 
 var defaults = {
   // local directory
@@ -28,7 +29,7 @@ var defaults = {
   static: false
 };
 
-function combo(options) {
+module.exports = function (options) {
 
   options = extend(defaults, options);
 
@@ -37,105 +38,83 @@ function combo(options) {
     function() {return directory;} : options.directory;
 
   return function(req, res, next) {
-    options.directory = getDir(req);
-
     debug('Request %s', req.url);
-    var files = normalize(req.url);
-    debug('Split %s', files);
-    var exts = getExt(files);
-    debug('Extension %s', exts);
+    var url = combo.parse(decodeURIComponent(req.url));
+    var exts = url ? getExt(url.combo) : [path.extname(req.url)];
+    var ext = exts[0];
 
-    var isCombo = decodeURIComponent(req.url).indexOf('??') > -1;
-    if (isCombo && files.length !== 0) {
+    var opt = {
+      directory: getDir(req),
+      cache: options.cache,
+      proxy: options.proxy
+    };
+
+    // combo file
+    if (url) {
       log('Request ' + req.url, options);
+
+      debug('Combo path %s', url.combo);
+      debug('Extension %s', exts);
 
       if (exts.length !== 1) {
         res.writeHead(400, {'Content-Type': 'text/html'});
-        res.end('400 Bad Request');
-      } else {
-        async.map(files, function(item, done) {
-          var f = new File(item, options).end(done);
-          logFile(f, options);
-        }, function(err, results){
-          if (err) {
-            res.writeHead(404, {'Content-Type': 'text/html'});
-            res.end('404 Not Found');
-          } else {
-            res.writeHead(200, {
-              'Content-Type': mime.lookup(exts[0]),
-              'Date': new Date().toUTCString()
-            });
-            res.end(results.join('\n'));
-          }
-        });
+        return res.end('400 Bad Request');
       }
+
+      var files = url.combo;
+      var ready = pedding(files.length, hanldeSuccess);
+      var error = pedding(1, handleError);
+
+      var streams;
+      try {
+        streams = files.map(function(file) {
+          return proxy(file, opt)
+          .once('ready', ready)
+          .once('error', error);
+        });
+      } catch(e) {
+        return handleError();
+      }
+
     } else if (options.static) {
+      url = parse(req.url).pathname;
       log('Request ' + req.url, options);
 
-      var f = new File(files[0], options).end(function(err, data) {
-        if (err) {
-          res.writeHead(404, {'Content-Type': 'text/html'});
-          res.end('404 Not Found');
-        } else {
+      try {
+        proxy(url, opt)
+        .on('ready', function() {
           res.writeHead(200, {
-            'Content-Type': mime.lookup(exts[0]),
+            'Content-Type': mime.lookup(ext),
             'Date': new Date().toUTCString()
           });
-          res.end(data);
-        }
-      });
-      logFile(f, options);
-
+        })
+        .on('error', handleError)
+        .pipe(res);
+      } catch(e) {
+        handleError();
+      }
     } else {
       // next middleware
       next();
     }
-  };
-}
 
-// '/a??b.js,c/d.js' => ['a/b.js', 'a/c/d.js']
-function normalize(url) {
-  url = parse(url);
-  var comboPath = extractComboPath(url.query);
-  if (comboPath) {
-    var base = url.pathname;
-    return comboPath
-      .split(',')
-      .map(function(item) {
-        item = parse(item).pathname;
-        return path.join(base, item);
+    function hanldeSuccess() {
+      res.writeHead(200, {
+        'Content-Type': mime.lookup(ext),
+        'Date': new Date().toUTCString()
       });
-  } else {
-    return [url.pathname];
-  }
-}
+      new Combine(streams).pipe(res);
+    }
 
-// /??a.js,b.js&c=d => a.js,b.js
-function extractComboPath(query) {
-  if (!query) { return; }
-  var ret;
-  query.split('&')
-    .forEach(function(item) {
-      item = decodeURIComponent(item);
-      if (!ret && item.charAt(0) === '?') {
-        ret = item.substring(1).split('=')[0];
-      }
-    });
-  return ret;
-}
-
-function logFile(file, options) {
-  file
-    .on('found', function(str) {
-      log('Found ' + str, options);
-    })
-    .on('not found', function(str) {
-      log('Not Found ' + str, options);
-    })
-    .on('cached', function(str) {
-      log('Cached ' + str, options);
-    });
-}
+    function handleError() {
+      res.writeHead(404, {
+        'Content-Type': mime.lookup(ext),
+        'Date': new Date().toUTCString()
+      });
+      res.end('Not Found');
+    }
+  };
+};
 
 function log(str, options) {
   options.log && console.log('>> ' + str);
