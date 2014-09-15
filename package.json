@@ -1,6 +1,6 @@
 {
   "name": "connect-combo",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "connect middleware for assets combo.",
   "dependencies": {
     "async": "~0.7.0",
