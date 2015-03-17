@@ -7,7 +7,8 @@
     "combo-url": "~0.2.0",
     "debug": "~1.0.4",
     "mime": "~1.2.11",
-    "urlproxy": "~0.1.0"
+    "urlproxy": "~0.1.0",
+    "pedding": "1.0.0"
   },
   "devDependencies": {
     "connect": "~2.14.4",
