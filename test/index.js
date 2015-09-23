@@ -19,7 +19,7 @@ describe('Combo', function() {
       request(app)
         .get('/??a.js,b.js,c/d.js')
         .expect('Content-Type', 'application/javascript')
-        .expect('define("a", function(){});\ndefine("b", function(){});\ndefine("d", function(){});')
+        .expect('define("a", function(){});define("b", function(){});define("d", function(){});')
         .end(done);
     });
 
@@ -28,7 +28,7 @@ describe('Combo', function() {
       request(app)
         .get('/c??d.js,e.js')
         .expect('Content-Type', 'application/javascript')
-        .expect('define("d", function(){});\ndefine("e", function(){});')
+        .expect('define("d", function(){});define("e", function(){});')
         .end(done);
     });
 
@@ -61,7 +61,7 @@ describe('Combo', function() {
       var widget = fs.readFileSync(path.join(__dirname, './fixture/widget.js')).toString();
       request(app)
         .get('/??a.js,arale/widget/1.0.0/widget.js')
-        .expect('define("a", function(){});\n' + widget)
+        .expect('define("a", function(){});' + widget)
         .end(done);
     });
 
@@ -144,7 +144,7 @@ describe('Combo', function() {
     var app = createServer(options);
     request(app)
       .get('/??a.js?123,b.js?456&input_encoding=utf-8')
-      .expect('define("a", function(){});\ndefine("b", function(){});', done);
+      .expect('define("a", function(){});define("b", function(){});', done);
   });
 
   it('should show log', function(done) {

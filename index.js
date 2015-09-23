@@ -1,3 +1,5 @@
+'use strict';
+
 var path = require('path');
 var debug = require('debug')('connect-combo');
 var async = require('async');
@@ -33,8 +35,8 @@ function combo(options) {
   options = extend(defaults, options);
 
   var directory = options.directory;
-  var getDir = typeof options.directory === 'string'?
-    function() {return directory;} : options.directory;
+  var getDir = typeof options.directory === 'string' ?
+    function() { return directory; } : options.directory;
 
   return function(req, res, next) {
     options.directory = getDir(req);
@@ -65,7 +67,7 @@ function combo(options) {
               'Content-Type': mime.lookup(exts[0]),
               'Date': new Date().toUTCString()
             });
-            res.end(results.join('\n'));
+            res.end(Buffer.concat(results));
           }
         });
       }
