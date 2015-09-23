@@ -1,3 +1,5 @@
+'use strict';
+
 var path = require('path');
 var debug = require('debug')('connect-combo');
 var async = require('async');
@@ -25,7 +27,7 @@ var defaults = {
 
   // serve as normal static server, also support proxy,
   // or you can use `connect.static` without proxy
-  static: false
+  static: false,
 };
 
 function combo(options) {
@@ -33,8 +35,8 @@ function combo(options) {
   options = extend(defaults, options);
 
   var directory = options.directory;
-  var getDir = typeof options.directory === 'string'?
-    function() {return directory;} : options.directory;
+  var getDir = typeof options.directory === 'string' ?
+    function() { return directory; } : options.directory;
 
   return function(req, res, next) {
     options.directory = getDir(req);
@@ -63,9 +65,9 @@ function combo(options) {
           } else {
             res.writeHead(200, {
               'Content-Type': mime.lookup(exts[0]),
-              'Date': new Date().toUTCString()
+              'Date': new Date().toUTCString(),
             });
-            res.end(results.join('\n'));
+            res.end(Buffer.concat(results));
           }
         });
       }
@@ -79,7 +81,7 @@ function combo(options) {
         } else {
           res.writeHead(200, {
             'Content-Type': mime.lookup(exts[0]),
-            'Date': new Date().toUTCString()
+            'Date': new Date().toUTCString(),
           });
           res.end(data);
         }

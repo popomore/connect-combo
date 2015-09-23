@@ -1,19 +1,22 @@
+'use strict';
+
 require('should');
 var fs = require('fs');
 var join = require('path').join;
 var url = require('url');
 var sinon = require('sinon');
 var File = require('..').File;
+var fixture = join(__dirname, 'fixture');
 
 describe('File', function() {
 
   var options;
 
   beforeEach(function() {
-    options= {
-      directory: join(__dirname, 'fixture'),
+    options = {
+      directory: fixture,
       proxy: 'http://static.alipayobjects.com',
-      cache: false
+      cache: false,
     };
   });
 
@@ -31,6 +34,7 @@ describe('File', function() {
     new File('beforeproxy.js', options)
       .on('found', spy)
       .end(function(err, data) {
+        if (err) return done(err);
         data.should.be.eql('beforeproxy');
         spy.calledOnce.should.be.true;
         done();
@@ -42,7 +46,8 @@ describe('File', function() {
     new File('a.js', options)
       .on('found', spy)
       .end(function(err, data) {
-        data.should.be.eql('define("a", function(){});');
+        if (err) return done(err);
+        data.toString().should.be.eql('define("a", function(){});');
         spy.calledOnce.should.be.true;
         spy.calledWith(join(options.directory, 'a.js')).should.be.true;
         done();
@@ -54,7 +59,7 @@ describe('File', function() {
     var spy = sinon.spy();
     new File('c.js', options)
       .on('not found', spy)
-      .end(function(err, data) {
+      .end(function(err) {
         err.should.be.an.instanceof(Error);
         spy.calledOnce.should.be.true;
         spy.calledWith(join(options.directory, 'c.js')).should.be.true;
@@ -70,7 +75,8 @@ describe('File', function() {
       .on('not found', spy1)
       .on('found', spy2)
       .end(function(err, data) {
-        data.should.be.eql(seajs);
+        if (err) return done(err);
+        data.toString().should.be.eql(seajs);
         spy1.calledOnce.should.be.true;
         spy2.calledOnce.should.be.true;
         spy1.calledWith(join(options.directory, 'seajs/seajs/2.1.1/sea.js')).should.be.true;
@@ -83,7 +89,7 @@ describe('File', function() {
     var spy = sinon.spy();
     new File('seajs/seajs/2.1.1/not-exist.js', options)
       .on('not found', spy)
-      .end(function(err, data) {
+      .end(function(err) {
         err.should.be.an.instanceof(Error);
         spy.calledTwice.should.be.true;
         spy.calledWith(join(options.directory, 'seajs/seajs/2.1.1/not-exist.js')).should.be.true;
@@ -95,7 +101,6 @@ describe('File', function() {
   it('should response from remote and cached', function(done) {
     options.cache = true;
     var file = 'seajs/1.3.1/sea.js';
-    var seajs = fs.readFileSync(join(__dirname, './fixture/sea.js')).toString();
     var cached = join(__dirname, 'fixture', file);
     fs.existsSync(cached) && fs.unlinkSync(cached);
 
@@ -106,7 +111,8 @@ describe('File', function() {
       .on('not found', spy1)
       .on('found', spy2)
       .on('cached', spy3)
-      .end(function(err, data) {
+      .end(function(err) {
+        if (err) return done(err);
         spy1.calledOnce.should.be.true;
         spy2.calledOnce.should.be.true;
         spy3.calledOnce.should.be.true;
@@ -115,6 +121,20 @@ describe('File', function() {
         spy3.calledWith(join(options.directory, file)).should.be.true;
         fs.existsSync(cached).should.be.true;
         fs.unlinkSync(cached);
+        done();
+      });
+  });
+
+  it('should get ttf', function(done) {
+    var len = fs.readFileSync(join(fixture, 'a.ttf')).length;
+    var spy = sinon.spy();
+    new File('a.ttf', options)
+      .on('found', spy)
+      .end(function(err, data) {
+        if (err) return done(err);
+        spy.calledOnce.should.be.true;
+        new Buffer(data).length.should.eql(len);
+        spy.calledWith(join(options.directory, 'a.ttf')).should.be.true;
         done();
       });
   });
