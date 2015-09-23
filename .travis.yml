@@ -1,7 +1,16 @@
+sudo: false
+
 language: node_js
 
 node_js:
-  - "0.10"
   - "0.11"
+  - "0.11.12"
+  - "0.12"
+  - 1
+  - 2
+  - 3
+  - 4
 
-after_success: make coveralls
+script: npm run cov
+
+after_success: npm install codecov.io && cat ./coverage/coverage-final.json | ./node_modules/codecov.io/bin/codecov.io.js

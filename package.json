@@ -9,8 +9,7 @@
     "urllib": "~0.5.15"
   },
   "devDependencies": {
-    "istanbul": "~0.2.7",
-    "coveralls": "~2.10.0",
+    "istanbul": "0",
     "mocha": "~1.18.2",
     "should": "~3.3.1",
     "sinon": "~1.9.1",
@@ -24,7 +23,10 @@
     "url": "https://github.com/popomore/connect-combo.git"
   },
   "scripts": {
-    "test": "make test",
-    "lint": "eslint ./lib ./test/*.js index.js"
+    "test": "mocha -R spec -t 20000",
+    "lint": "eslint ./lib ./test/*.js index.js",
+    "cover": "istanbul cover --report none --print none node_modules/mocha/bin/_mocha -- -R spec -t 20000",
+    "cov": "npm run clean && npm run lint && npm run cover && istanbul report text-summary json lcov html",
+    "clean": "rm -rf coverage"
   }
 }
