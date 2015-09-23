@@ -16,7 +16,7 @@ describe('File', function() {
     options = {
       directory: fixture,
       proxy: 'http://static.alipayobjects.com',
-      cache: false
+      cache: false,
     };
   });
 

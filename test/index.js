@@ -1,3 +1,5 @@
+'use strict';
+
 var fs = require('fs');
 var path = require('path');
 var connect = require('connect');
@@ -11,7 +13,7 @@ describe('Combo', function() {
 
   describe('local', function() {
     var options = {
-      directory: path.join(__dirname, './fixture')
+      directory: path.join(__dirname, './fixture'),
     };
 
     it('should combo different directory', function(done) {
@@ -53,7 +55,7 @@ describe('Combo', function() {
   describe('remote', function() {
     var options = {
       directory: path.join(__dirname, './fixture'),
-      proxy: 'http://static.alipayobjects.com'
+      proxy: 'http://static.alipayobjects.com',
     };
 
     it('should combo different directory', function(done) {
@@ -76,7 +78,7 @@ describe('Combo', function() {
   describe('static', function() {
     var options = {
       directory: path.join(__dirname, './fixture'),
-      static: true
+      static: true,
     };
 
     it('should return right', function(done) {
@@ -105,7 +107,7 @@ describe('Combo', function() {
     it('static', function(done) {
       var options = {
         directory: path.join(__dirname, './fixture'),
-        static: true
+        static: true,
       };
       var app = createServer(options);
       request(app)
@@ -116,7 +118,7 @@ describe('Combo', function() {
 
     it('combo', function(done) {
       var options = {
-        directory: path.join(__dirname, './fixture')
+        directory: path.join(__dirname, './fixture'),
       };
       var app = createServer(options);
       request(app)
@@ -127,7 +129,7 @@ describe('Combo', function() {
 
     it('400', function(done) {
       var options = {
-        directory: path.join(__dirname, './fixture')
+        directory: path.join(__dirname, './fixture'),
       };
       var app = createServer(options);
       request(app)
@@ -139,7 +141,7 @@ describe('Combo', function() {
 
   it('url parse with query', function(done) {
     var options = {
-      directory: path.join(__dirname, './fixture')
+      directory: path.join(__dirname, './fixture'),
     };
     var app = createServer(options);
     request(app)
@@ -157,7 +159,7 @@ describe('Combo', function() {
       directory: path.join(__dirname, './fixture'),
       proxy: 'http://ajax.googleapis.com',
       cache: true,
-      log: true
+      log: true,
     };
     var app = createServer(options);
     request(app)
@@ -190,7 +192,7 @@ describe('Combo', function() {
       directory: function(req) {
         var dir = req.url.split('?')[1].split('=')[1];
         return path.join(__dirname, 'fixture', dir);
-      }
+      },
     };
     var app = createServer(options);
     request(app)
@@ -202,7 +204,7 @@ describe('Combo', function() {
 function createServer(options) {
   if (!options) {
     options = {
-      directory: path.join(__dirname, './fixture')
+      directory: path.join(__dirname, './fixture'),
     };
   }
   return connect()

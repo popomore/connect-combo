@@ -27,7 +27,7 @@ var defaults = {
 
   // serve as normal static server, also support proxy,
   // or you can use `connect.static` without proxy
-  static: false
+  static: false,
 };
 
 function combo(options) {
@@ -65,7 +65,7 @@ function combo(options) {
           } else {
             res.writeHead(200, {
               'Content-Type': mime.lookup(exts[0]),
-              'Date': new Date().toUTCString()
+              'Date': new Date().toUTCString(),
             });
             res.end(Buffer.concat(results));
           }
@@ -81,7 +81,7 @@ function combo(options) {
         } else {
           res.writeHead(200, {
             'Content-Type': mime.lookup(exts[0]),
-            'Date': new Date().toUTCString()
+            'Date': new Date().toUTCString(),
           });
           res.end(data);
         }
