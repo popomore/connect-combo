@@ -6,6 +6,7 @@
     "async": "~0.7.0",
     "debug": "~0.8.0",
     "mime": "~1.2.11",
+    "mkdirp": "~0.5.1",
     "urllib": "~0.5.15"
   },
   "devDependencies": {
