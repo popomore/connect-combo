@@ -1,6 +1,10 @@
-# History
 
----
+0.3.0 / 2015-09-25
+==================
+
+  * refactor: use mkdirp module
+  * feat: options.proxy support array and can request multi url
+  * fix: return buffer rather than string
 
 ## 0.2.7
 
