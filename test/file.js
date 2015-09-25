@@ -55,7 +55,10 @@ describe('File', function() {
   });
 
   it('should response 404 from local', function(done) {
-    options.proxy = '';
+    var options = {
+      directory: fixture,
+      cache: false,
+    };
     var spy = sinon.spy();
     new File('c.js', options)
       .on('not found', spy)
@@ -80,7 +83,33 @@ describe('File', function() {
         spy1.calledOnce.should.be.true;
         spy2.calledOnce.should.be.true;
         spy1.calledWith(join(options.directory, 'seajs/seajs/2.1.1/sea.js')).should.be.true;
-        spy2.calledWith(url.resolve(options.proxy, 'seajs/seajs/2.1.1/sea.js')).should.be.true;
+        spy2.calledWith('http://static.alipayobjects.com/seajs/seajs/2.1.1/sea.js').should.be.true;
+        done();
+      });
+  });
+
+  it('should response from remote with multi url', function(done) {
+    options = {
+      directory: fixture,
+      proxy: [
+        'http://pic.alipayobjects.com',
+        'http://static.alipayobjects.com',
+      ],
+      cache: false,
+    };
+    var seajs = fs.readFileSync(join(__dirname, './fixture/sea.js')).toString();
+    var spy1 = sinon.spy();
+    var spy2 = sinon.spy();
+    new File('seajs/seajs/2.1.1/sea.js', options)
+      .on('not found', spy1)
+      .on('found', spy2)
+      .end(function(err, data) {
+        if (err) return done(err);
+        data.toString().should.be.eql(seajs);
+        spy1.calledTwice.should.be.true;
+        spy2.calledOnce.should.be.true;
+        spy1.calledWith(join(options.directory, 'seajs/seajs/2.1.1/sea.js')).should.be.true;
+        spy2.calledWith('http://static.alipayobjects.com/seajs/seajs/2.1.1/sea.js').should.be.true;
         done();
       });
   });
@@ -93,7 +122,7 @@ describe('File', function() {
         err.should.be.an.instanceof(Error);
         spy.calledTwice.should.be.true;
         spy.calledWith(join(options.directory, 'seajs/seajs/2.1.1/not-exist.js')).should.be.true;
-        spy.calledWith(url.resolve(options.proxy, 'seajs/seajs/2.1.1/not-exist.js')).should.be.true;
+        spy.calledWith('http://static.alipayobjects.com/seajs/seajs/2.1.1/not-exist.js').should.be.true;
         done();
       });
   });
@@ -117,7 +146,7 @@ describe('File', function() {
         spy2.calledOnce.should.be.true;
         spy3.calledOnce.should.be.true;
         spy1.calledWith(join(options.directory, file)).should.be.true;
-        spy2.calledWith(url.resolve(options.proxy, file)).should.be.true;
+        spy2.calledWith(url.resolve('http://static.alipayobjects.com', file)).should.be.true;
         spy3.calledWith(join(options.directory, file)).should.be.true;
         fs.existsSync(cached).should.be.true;
         fs.unlinkSync(cached);
