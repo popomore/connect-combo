@@ -114,6 +114,29 @@ describe('File', function() {
       });
   });
 
+  it('should response when proxy is not only host', function(done) {
+    options = {
+      directory: fixture,
+      proxy: 'http://static.alipayobjects.com/seajs',
+      cache: false,
+    };
+    var seajs = fs.readFileSync(join(__dirname, './fixture/sea.js')).toString();
+    var spy1 = sinon.spy();
+    var spy2 = sinon.spy();
+    new File('seajs/2.1.1/sea.js', options)
+      .on('not found', spy1)
+      .on('found', spy2)
+      .end(function(err, data) {
+        if (err) return done(err);
+        data.toString().should.be.eql(seajs);
+        spy1.calledOnce.should.be.true;
+        spy2.calledOnce.should.be.true;
+        spy1.calledWith(join(options.directory, 'seajs/2.1.1/sea.js')).should.be.true;
+        spy2.calledWith('http://static.alipayobjects.com/seajs/seajs/2.1.1/sea.js').should.be.true;
+        done();
+      });
+  });
+
   it('should response 404 from remote', function(done) {
     var spy = sinon.spy();
     new File('seajs/seajs/2.1.1/not-exist.js', options)
