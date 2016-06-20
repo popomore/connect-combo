@@ -199,6 +199,23 @@ describe('Combo', function() {
       .get('/d.js?dir=c')
       .expect('define("d", function(){});', done);
   });
+
+  it('proxy function', function(done) {
+    var options = {
+      directory: path.join(__dirname, './fixture'),
+      proxy: function(req) {
+        var key = req.headers.host.split('.')[0];
+        return [ 'http://static.alipayobjects.com/' + key ];
+      },
+    };
+    var app = createServer(options);
+    var widget = fs.readFileSync(path.join(__dirname, './fixture/widget.js')).toString();
+    request(app)
+      .get('??/widget/1.0.0/widget.js')
+      .set('host', 'arale.alipay.com')
+      .expect(widget)
+      .end(done);
+  });
 });
 
 function createServer(options) {

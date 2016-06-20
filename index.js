@@ -4,6 +4,7 @@ var path = require('path');
 var debug = require('debug')('connect-combo');
 var async = require('async');
 var mime = require('mime');
+var extend = require('extend');
 var parse = require('url').parse;
 var File = require('./lib/file');
 
@@ -32,14 +33,21 @@ var defaults = {
 
 function combo(options) {
 
-  options = extend(defaults, options);
+  options = extend({}, defaults, options);
 
   var directory = options.directory;
   var getDir = typeof options.directory === 'string' ?
     function() { return directory; } : options.directory;
 
+  var proxy = options.proxy;
+  var getProxy = typeof options.proxy !== 'function' ?
+    function() { return proxy; } : options.proxy;
+
   return function(req, res, next) {
-    options.directory = getDir(req);
+    var opt = extend({}, options, {
+      directory: getDir(req),
+      proxy: getProxy(req),
+    });
 
     debug('Request %s', req.url);
     var files = normalize(req.url);
@@ -49,15 +57,15 @@ function combo(options) {
 
     var isCombo = decodeURIComponent(req.url).indexOf('??') > -1;
     if (isCombo && files.length !== 0) {
-      log('Request ' + req.url, options);
+      log('Request ' + req.url, opt);
 
       if (exts.length !== 1) {
         res.writeHead(400, {'Content-Type': 'text/html'});
         res.end('400 Bad Request');
       } else {
         async.map(files, function(item, done) {
-          var f = new File(item, options).end(done);
-          logFile(f, options);
+          var f = new File(item, opt).end(done);
+          logFile(f, opt);
         }, function(err, results){
           if (err) {
             res.writeHead(404, {'Content-Type': 'text/html'});
@@ -71,10 +79,10 @@ function combo(options) {
           }
         });
       }
-    } else if (options.static) {
-      log('Request ' + req.url, options);
+    } else if (opt.static) {
+      log('Request ' + req.url, opt);
 
-      var f = new File(files[0], options).end(function(err, data) {
+      var f = new File(files[0], opt).end(function(err, data) {
         if (err) {
           res.writeHead(404, {'Content-Type': 'text/html'});
           res.end('404 Not Found');
@@ -86,7 +94,7 @@ function combo(options) {
           res.end(data);
         }
       });
-      logFile(f, options);
+      logFile(f, opt);
 
     } else {
       // next middleware
@@ -151,14 +159,4 @@ function getExt(files) {
   }).filter(function(item, index, arr) {
     return index === arr.indexOf(item);
   });
-}
-
-function extend(target, src) {
-  var result = {};
-  for (var key in target) {
-    if (target.hasOwnProperty(key)) {
-      result[key] = src[key] || target[key];
-    }
-  }
-  return result;
 }
