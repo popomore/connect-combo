@@ -92,7 +92,7 @@ describe('File', function() {
     options = {
       directory: fixture,
       proxy: [
-        'http://pic.alipayobjects.com',
+        'http://i.alipayobjects.com',
         'http://static.alipayobjects.com',
       ],
       cache: false,
