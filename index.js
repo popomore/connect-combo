@@ -71,15 +71,25 @@ function combo(options) {
             res.writeHead(404, {'Content-Type': 'text/html'});
             res.end('404 Not Found');
           } else {
-            res.writeHead(200, {
+            var headers = {
               'Content-Type': mime.lookup(exts[0]),
               'Date': new Date().toUTCString(),
+            };
+            // get the header from first combo file
+            if (results[0].headers !== null) {
+              headers = extend({}, headers, results[0].headers);
+            }
+            res.writeHead(200, headers);
+
+            var tmpres = results.map(function(r) {
+              return r.data;
             });
-            res.end(Buffer.concat(results));
+            res.end(Buffer.concat(tmpres));
           }
         });
       }
     } else if (opt.static) {
+
       log('Request ' + req.url, opt);
 
       var f = new File(files[0], opt).end(function(err, data) {
@@ -87,11 +97,16 @@ function combo(options) {
           res.writeHead(404, {'Content-Type': 'text/html'});
           res.end('404 Not Found');
         } else {
-          res.writeHead(200, {
+          var headers = {
             'Content-Type': mime.lookup(exts[0]),
             'Date': new Date().toUTCString(),
-          });
-          res.end(data);
+          };
+          // get the header from first combo file
+          if (data.headers !== null) {
+            headers = extend({}, headers, data.headers);
+          }
+          res.writeHead(200, headers);
+          res.end(data.data);
         }
       });
       logFile(f, opt);

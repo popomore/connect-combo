@@ -75,6 +75,44 @@ describe('Combo', function() {
     });
   });
 
+  describe('headers', function() {
+    var options = {
+      directory: '',
+      proxy: 'https://cdnjs.cloudflare.com',
+      static: true,
+    };
+
+    it('should get header from origin url', function(done) {
+      var app = createServer(options);
+      request(app)
+        .get('/ajax/libs/jquery/3.0.0/core.js')
+        .expect('access-control-allow-origin', '*')
+        .expect('cache-control', 'public, max-age=30672000')
+        .end(done);
+    });
+
+    it('should get header from origin url if combo', function(done) {
+      var app = createServer(options);
+      request(app)
+        .get('/??ajax/libs/jquery/3.0.0/core.js')
+        .expect('access-control-allow-origin', '*')
+        .expect('cache-control', 'public, max-age=30672000')
+        .end(done);
+    });
+
+    it('should not get header from origin url if enable cache', function(done) {
+      options.cache = true;
+      options.directory = path.join(__dirname, './fixture');
+      var app = createServer(options);
+      request(app)
+        .get('/ajax/libs/jquery/3.0.0/core.js')
+        .expect(function(res) {
+          Object.keys(res.headers).should.not.have.property('access-control-allow-origin', 'cache-control');
+        })
+        .end(done);
+    });
+  });
+
   describe('static', function() {
     var options = {
       directory: path.join(__dirname, './fixture'),
