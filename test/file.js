@@ -47,7 +47,7 @@ describe('File', function() {
       .on('found', spy)
       .end(function(err, data) {
         if (err) return done(err);
-        data.toString().should.be.eql('define("a", function(){});');
+        data.data.toString().should.be.eql('define("a", function(){});');
         spy.calledOnce.should.be.true;
         spy.calledWith(join(options.directory, 'a.js')).should.be.true;
         done();
@@ -79,7 +79,7 @@ describe('File', function() {
       .on('found', spy2)
       .end(function(err, data) {
         if (err) return done(err);
-        data.toString().should.be.eql(seajs);
+        data.data.toString().should.be.eql(seajs);
         spy1.calledOnce.should.be.true;
         spy2.calledOnce.should.be.true;
         spy1.calledWith(join(options.directory, 'seajs/seajs/2.1.1/sea.js')).should.be.true;
@@ -89,10 +89,10 @@ describe('File', function() {
   });
 
   it('should response from remote with multi url', function(done) {
-    options = {
+    var options = {
       directory: fixture,
       proxy: [
-        'http://i.alipayobjects.com',
+        'http://i.alipayobjects-xxx.com',
         'http://static.alipayobjects.com',
       ],
       cache: false,
@@ -105,7 +105,7 @@ describe('File', function() {
       .on('found', spy2)
       .end(function(err, data) {
         if (err) return done(err);
-        data.toString().should.be.eql(seajs);
+        data.data.toString().should.be.eql(seajs);
         spy1.calledTwice.should.be.true;
         spy2.calledOnce.should.be.true;
         spy1.calledWith(join(options.directory, 'seajs/seajs/2.1.1/sea.js')).should.be.true;
@@ -115,7 +115,7 @@ describe('File', function() {
   });
 
   it('should response when proxy is not only host', function(done) {
-    options = {
+    var options = {
       directory: fixture,
       proxy: 'http://static.alipayobjects.com/seajs',
       cache: false,
@@ -128,7 +128,7 @@ describe('File', function() {
       .on('found', spy2)
       .end(function(err, data) {
         if (err) return done(err);
-        data.toString().should.be.eql(seajs);
+        data.data.toString().should.be.eql(seajs);
         spy1.calledOnce.should.be.true;
         spy2.calledOnce.should.be.true;
         spy1.calledWith(join(options.directory, 'seajs/2.1.1/sea.js')).should.be.true;
@@ -185,9 +185,10 @@ describe('File', function() {
       .end(function(err, data) {
         if (err) return done(err);
         spy.calledOnce.should.be.true;
-        new Buffer(data).length.should.eql(len);
+        new Buffer(data.data).length.should.eql(len);
         spy.calledWith(join(options.directory, 'a.ttf')).should.be.true;
         done();
       });
   });
+
 });
