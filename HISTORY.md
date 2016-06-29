@@ -1,4 +1,9 @@
 
+0.5.0 / 2016-06-29
+==================
+
+  * feat: carry http header from origin url if use combo as proxy only (#12)
+
 0.4.0 / 2016-06-20
 ==================
 
